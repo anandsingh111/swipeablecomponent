@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef } from 'react';
 
 const SwappableTabs = () => {
   const [activeTab, setActiveTab] = useState(1);
@@ -13,20 +13,27 @@ const SwappableTabs = () => {
     touchStartX.current = e.touches[0].clientX;
   };
 
-  const handleTouchEnd = (e) => {
-    if (touchStartX.current === null) return;
+  const handleTouchMove = (e) => {
+    if (touchStartX.current !== null) {
+      e.preventDefault();
+    }
+  };
 
-    const touchEndX = e.changedTouches[0].clientX;
-    const deltaX = touchEndX - touchStartX.current;
-    touchStartX.current = null;
+  const handleTouchEnd = () => {
+    if (touchStartX.current !== null) {
+      const tabContentWidth = tabContentRef.current.clientWidth;
+      const touchEndX = touchStartX.current;
+      const deltaX = touchEndX - touchStartX.current;
 
-    if (Math.abs(deltaX) > 50) {
-      // Adjust the swipe sensitivity by changing the value (50 in this case)
-      if (deltaX > 0 && activeTab > 1) {
-        handleTabChange(activeTab - 1);
-      } else if (deltaX < 0 && activeTab < 3) {
-        handleTabChange(activeTab + 1);
+      if (Math.abs(deltaX) > tabContentWidth / 4) {
+        if (deltaX < 0 && activeTab < 3) {
+          handleTabChange(activeTab + 1);
+        } else if (deltaX > 0 && activeTab > 1) {
+          handleTabChange(activeTab - 1);
+        }
       }
+
+      touchStartX.current = null;
     }
   };
 
@@ -34,19 +41,19 @@ const SwappableTabs = () => {
     <div>
       <div className="tab-buttons">
         <button
-          className={activeTab === 1 ? "active" : ""}
+          className={activeTab === 1 ? 'active' : ''}
           onClick={() => handleTabChange(1)}
         >
           Tab 1
         </button>
         <button
-          className={activeTab === 2 ? "active" : ""}
+          className={activeTab === 2 ? 'active' : ''}
           onClick={() => handleTabChange(2)}
         >
           Tab 2
         </button>
         <button
-          className={activeTab === 3 ? "active" : ""}
+          className={activeTab === 3 ? 'active' : ''}
           onClick={() => handleTabChange(3)}
         >
           Tab 3
@@ -56,6 +63,7 @@ const SwappableTabs = () => {
         ref={tabContentRef}
         className="tab-content"
         onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
         {activeTab === 1 && (
